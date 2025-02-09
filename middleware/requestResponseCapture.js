@@ -20,13 +20,13 @@ exports.capturePayloads = function capturePayloads(req, res, next) {
         res.send = function (data) {
             logs.responseData = data;
             if(!logs.responseData || logs.responseData.length < 5000) {
-                logger.writeLog(logs);
+                logger.info('Request/Response:', logs);
             }
             oldSend.apply(res, arguments);
         };
     }
     catch(e) {
-        logger.writeLog(e);
+        logger.error('Error in requestResponseCapture:', e);
     }
     next();
 };

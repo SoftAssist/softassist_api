@@ -5,6 +5,7 @@ logger:
   metadata:
     service: softAssist
   externalApiLogging: true
+  requestLogging: true
   externalApiInteractionOptions:
     json: true
     retry: 2
