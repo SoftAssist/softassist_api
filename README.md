@@ -15,3 +15,13 @@ TBD
 
 Frontend setup:
 TBD
+
+
+To run unit tests:
+Unit tests are written with mocha and chai.
+
+run 'npm run test' to run the unit tests
+
+
+
+This should pick up files in the test directory.  At this time, there is no db connection for seed data.  This will be added in the future.
