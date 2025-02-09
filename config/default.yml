@@ -1,0 +1,15 @@
+http:
+  port: <%HOST_PORT%>
+logger:
+  level: <%LOG_LEVEL%>
+  metadata:
+    service: softAssist
+  externalApiLogging: true
+  externalApiInteractionOptions:
+    json: true
+    retry: 2
+    verbose_logging: false
+    delay: 500
+    factor: 2
+    accepted: -400
+      -404

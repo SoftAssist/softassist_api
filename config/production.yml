@@ -1,0 +1,7 @@
+http:
+  port: 8080
+logger:
+  level: info
+  path: /dev/null
+  metadata:
+    service: softAssist
