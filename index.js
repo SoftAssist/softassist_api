@@ -6,8 +6,9 @@ const bodyParser = require('body-parser');
 
 const log = require('./lib/logger').create();
 const telemetry = require('./middleware/telemetry');
+const requestResponseCapture = require('./middleware/requestResponseCapture');
 const controllers = require('./controllers');
-const hijack = require('./middleware/hijack');
+const hijack = require('./lib/hijack');
 const cors = require('cors');
 
 const app = express();
@@ -16,11 +17,14 @@ app.use((req, res, next) => {
     context.run(() => next());
 });
 
+if(config.logger.externalApiLogging) {
+    hijack();
+}
+
 app.use(cors({
     origin: ['http://localhost:3000'],
 }));
 app.use(bodyParser.json());
-
 
 if(config.logger.requestLogging) {
     app.use(requestResponseCapture.capturePayloads);

@@ -5,8 +5,9 @@
     "main": "index.js",
     "scripts": {
         "start": "NODE_ENV=production node index.js --trace-warnings",
-        "test": "NODE_ENV=testing mocha tests --recursive --timeout 60000 --exit",
+        "test": "mocha --require test/setup.js tests --recursive --timeout 60000 --exit",
         "lint": "eslint .",
+        "lint:fix": "eslint . --fix",
         "start:dev-w": "NODE_ENV=development DEV_MODE=true nodemon index.js -e js,json,hbs,yml",
         "ci:test": "echo 'add ci tests'"
     },

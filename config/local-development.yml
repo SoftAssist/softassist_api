@@ -5,3 +5,4 @@ logger:
   path: /dev/null
   metadata:
     service: softAssist
+  externalApiLogging: true
