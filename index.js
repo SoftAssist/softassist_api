@@ -10,6 +10,8 @@ const requestResponseCapture = require('./middleware/requestResponseCapture');
 const controllers = require('./controllers');
 const hijack = require('./lib/hijack');
 const cors = require('cors');
+const connectDB = require("./db.js");
+
 
 const app = express();
 
@@ -25,6 +27,17 @@ app.use(cors({
     origin: ['http://localhost:3000'],
 }));
 app.use(bodyParser.json());
+
+// Connect to MongoDB
+const dbConnection = connectDB();
+
+app.get("/", (req, res) => {
+  res.send("API is running...");
+});
+
+// app.get("/health", (req, res) => {
+//   res.json({apiStatus: "online", dbStatus: dbConnection.readyState === 1 ? "online" : "offline"});
+// });
 
 if(config.logger.requestLogging) {
     app.use(requestResponseCapture.capturePayloads);

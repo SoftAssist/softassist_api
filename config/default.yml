@@ -19,3 +19,4 @@ atlassian:
   token: ATATT3xFfGF0_Z7veG9xpzHJn7BphO_ylzPCE6AbJU79wzjHXJfbuqDvXsgvpYmBKkSPIZIi5uUS1-CvKUtFyMsGL555BGXklXkHI2xPUdBUwWbmOofrbpe7Xu2LbzIcjwQ12HPB5ZE3LwOSYjeYeluz86BA1mfXnj4Zw3bi-aIFZU358tViubw=7809F4F6
   jira:
     url: https://softassist.atlassian.net
+MONGO_URI: mongodb+srv://softassist-api:6823PxS7yO9Lj01g@softassist-mongodb-b0219f09.mongo.ondigitalocean.com/admin?tls=true&authSource=admin
