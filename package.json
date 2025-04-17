@@ -34,7 +34,7 @@
         "prettier": "3.3.3",
         "requireindex": "^1.2.0",
         "supertest": "^7.0.0",
-        "uuid": "^11.0.5",
+        "uuid": "^11.1.0",
         "winston": "^3.17.0"
     },
     "devDependencies": {

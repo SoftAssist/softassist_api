@@ -14,13 +14,18 @@ if (!routes?.frontend?.jira) {
     throw new Error('Frontend jira routes are not properly configured');
 }
 
-if (!routes?.frontend?.project?.meetings) {
-    throw new Error('Frontend project meeting routes are not properly configured');
+if (!routes?.frontend?.meetings) {
+    throw new Error('Frontend meeting routes are not properly configured');
+}
+
+if (!routes?.frontend?.projects?.projects) {
+    throw new Error('Frontend project routes are not properly configured');
 }
 
 // Only add routes that exist
 router.use('/frontend/user', routes.frontend.user);
 router.use('/frontend/jira', routes.frontend.jira);
-router.use('/frontend/project/meetings', routes.frontend.project.meetings);
+router.use('/frontend/meetings', routes.frontend.meetings);
+router.use('/frontend/project', routes.frontend.projects.projects);
 
 module.exports = router;
