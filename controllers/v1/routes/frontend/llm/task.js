@@ -2,7 +2,8 @@
 
 const { runLLMGraph } = require('./extract');
 const { captureErrorAndRespond } = require('../../../../../middleware/errors');
-
+const Meeting = require('../../../../../models/meeting');
+const Task = require('../../../../../models/task');
 module.exports = (router) => {
     /**
    * @route POST /generateTasks
@@ -33,10 +34,23 @@ module.exports = (router) => {
       if (!meetingId) {
         return res.status(400).json({ message: 'meetingId is required' });
       }
-
+      const meeting = await Meeting.findById(meetingId);
+      await Task.deleteMany({
+        meetingId: meeting._id,
+        projectId: meeting.projectId,
+      });
       const graph = runLLMGraph();
       const result = await graph.invoke({ meetingId });
-
+      const savedTasks = await Promise.all(
+        result.results.map(async (task) => {
+          return await Task.create({
+            projectId: meeting.projectId,
+            meetingId: meeting._id,
+            summary: task.summary,
+            description: task.description,
+          });
+        })
+      );
       return res.json({
         success: true,
         tasks: result.results
