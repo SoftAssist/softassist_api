@@ -69,7 +69,7 @@ router.get('/', async (req, res) => {
 router.get('/:projectId', async (req, res) => {
     try {
         const project = await Project.findOne({
-            projectId: req.params.projectId 
+            _id: req.params.projectId 
         });
         
         if (!project) {
