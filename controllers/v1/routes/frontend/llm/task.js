@@ -28,6 +28,12 @@ module.exports = (router) => {
    *   ]
    * }
    */
+  router.get('/existingTasksForMeeting/:meetingId', async (req, res) => {
+    const { meetingId } = req.params;
+    const tasks = await Task.find({ meetingId });
+    return res.json({ tasks });
+  });
+
   router.post('/generateTasks', async (req, res) => {
     try {
       const { meetingId } = req.body;

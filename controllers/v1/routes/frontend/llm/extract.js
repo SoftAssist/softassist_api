@@ -1,12 +1,13 @@
 const { Annotation, StateGraph } = require('@langchain/langgraph');
 const { ChatOpenAI } = require('@langchain/openai');
 const { taskExtractionPrompt, outputFormat } = require('./prompt');
-require('dotenv').config();
-const Meeting = require('../../../../../models/meeting');
 const config = require('config');
+
+const Meeting = require('../../../../../models/meeting');
+
 const llm = new ChatOpenAI({
   temperature: 0.3,
-  openAIApiKey: process.env.OPENAI_API_KEY,
+  openAIApiKey: config.OPENAI_API_KEY_LANGCHAIN,
 });
 
 const StateAnnotation = Annotation.Root({
