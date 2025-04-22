@@ -22,10 +22,15 @@ if (!routes?.frontend?.projects?.projects) {
     throw new Error('Frontend project routes are not properly configured');
 }
 
+if (!routes?.frontend?.llm) {
+    throw new Error('Frontend LLM routes are not properly configured');
+}
+
 // Only add routes that exist
 router.use('/frontend/user', routes.frontend.user);
 router.use('/frontend/jira', routes.frontend.jira);
 router.use('/frontend/meetings', routes.frontend.meetings);
 router.use('/frontend/project', routes.frontend.projects.projects);
+router.use('/frontend/llm', routes.frontend.llm);
 
 module.exports = router;
