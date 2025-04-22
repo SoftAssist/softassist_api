@@ -2,9 +2,9 @@
 
 const router = require('express').Router();
 const { captureErrorAndRespond } = require('../../../../../middleware/errors');
-const { getAllProjects } = require('../../../../../lib/jira/project');
+const { getAllProjects, getProjectIssues } = require('../../../../../lib/jira/project');
 
-module.exports = (router) => {
+module.exports = () => {
     router.get('/', async (req, res) => {
         try {
             const projects = await getAllProjects();
@@ -17,4 +17,20 @@ module.exports = (router) => {
             return captureErrorAndRespond(err, res);
         }
     });
+
+    router.get('/:projectId/issues', async (req, res) => {
+        try {
+            const { projectId } = req.params;
+            const issues = await getProjectIssues(projectId);
+
+            return res.json({
+                success: true,
+                issues
+            });
+        } catch (err) {
+            return captureErrorAndRespond(err, res);
+        }
+    });
+
+    return router;
 };

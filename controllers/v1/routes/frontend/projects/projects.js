@@ -88,7 +88,7 @@ router.get('/:projectId', async (req, res) => {
 router.put('/:projectId/associated-jira-project/:jiraId', async (req, res) => {
     try {
         const project = await Project.findOne({ 
-            projectId: req.params.projectId 
+            _id: req.params.projectId 
         });
 
         if (!project) {

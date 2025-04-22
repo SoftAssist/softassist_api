@@ -18,6 +18,12 @@ const taskSchema = new mongoose.Schema({
     type: String,
     required: true,
   },
+  status: {
+    type: String,
+    required: true,
+    enum: ['proposed', 'accepted', 'rejected'],
+    default: 'proposed',
+  },
   createdAt: {
     type: Date,
     default: Date.now,
