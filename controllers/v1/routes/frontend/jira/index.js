@@ -3,6 +3,7 @@
 const express = require('express');
 const router = express.Router();
 
-require('./issue')(router);
+router.use('/issue', require('./issue')());
+router.use('/project', require('./project')());
 
 module.exports = router;

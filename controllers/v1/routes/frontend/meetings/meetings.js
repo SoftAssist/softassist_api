@@ -37,6 +37,74 @@ module.exports = (router) => {
         }
     });
 
+    // API key configuration
+    const apiKey = config.OPENAI_API_KEY; // Single API key
+
+    async function makeOpenAIRequest(messages) {
+        try {
+            const response = await axios.post('https://api.openai.com/v1/chat/completions', 
+                {
+                    model: "gpt-3.5-turbo",
+                    messages,
+                    max_tokens: 500
+                },
+                {
+                    headers: {
+                        'Authorization': `Bearer ${apiKey}`,
+                        'Content-Type': 'application/json'
+                    }
+                }
+            );
+            return response.data.choices[0].message.content;
+        } catch (error) {
+            throw error;
+        }
+    }
+
+    // Simple rate limiter implementation
+    class RateLimiter {
+        constructor(tokensPerInterval, interval) {
+            this.tokensPerInterval = tokensPerInterval;
+            this.interval = interval;
+            this.tokens = tokensPerInterval;
+            this.lastRefill = Date.now();
+        }
+
+        async tryRemoveToken() {
+            this._refillTokens();
+            
+            if (this.tokens > 0) {
+                this.tokens -= 1;
+                return true;
+            }
+            return false;
+        }
+
+        _refillTokens() {
+            const now = Date.now();
+            const timePassed = now - this.lastRefill;
+            const tokensToAdd = Math.floor(timePassed / this.interval * this.tokensPerInterval);
+            
+            if (tokensToAdd > 0) {
+                this.tokens = Math.min(this.tokensPerInterval, this.tokens + tokensToAdd);
+                this.lastRefill = now;
+            }
+        }
+    }
+
+    const rateLimiter = new RateLimiter(20, 60000); // 20 requests per minute
+
+    async function waitForToken() {
+        return new Promise((resolve) => {
+            if (rateLimiter.tryRemoveToken()) {
+                resolve();
+            } else {
+                // Wait and try again
+                setTimeout(() => waitForToken().then(resolve), 1000);
+            }
+        });
+    }
+
     // Define routes
     router.get('/', (req, res) => {
         try {
@@ -270,6 +338,51 @@ module.exports = (router) => {
             return res.json({ transcription: response.data.text });
 
         } catch (err) {
+            return captureErrorAndRespond(err, res);
+        }
+    });
+
+    // Modify the summary endpoint to handle the request synchronously
+    router.get('/:meetingId/summary', async (req, res) => {
+        try {
+            const meeting = await Meeting.findById(req.params.meetingId);
+            
+            if (!meeting) {
+                return res.status(404).json({ message: 'Meeting not found' });
+            }
+
+            if (!meeting.transcript) {
+                return res.status(400).json({ message: 'No transcript available for this meeting' });
+            }
+
+            // Return cached summary if it exists
+            if (meeting.summary) {
+                return res.json({ summary: meeting.summary });
+            }
+
+            console.log('Waiting for token');
+            await waitForToken(); // Wait for available capacity
+            
+            // Generate summary directly
+            const summary = await makeOpenAIRequest([
+                {
+                    role: "system",
+                    content: "You are a helpful assistant that creates concise summaries of meeting transcripts. Focus on key points, action items, and important decisions."
+                },
+                {
+                    role: "user",
+                    content: `Please summarize this meeting transcript: ${meeting.transcript}`
+                }
+            ]);
+
+            // Store the summary
+            meeting.summary = summary;
+            await meeting.save();
+
+            return res.json({ summary });
+
+        } catch (err) {
+            console.error('Summary generation error:', err);
             return captureErrorAndRespond(err, res);
         }
     });

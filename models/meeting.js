@@ -9,7 +9,8 @@ const meetingSchema = new mongoose.Schema({
         contentType: String
     },
     audioFileId: { type: mongoose.Schema.Types.ObjectId },
-    transcript: { type: String, required: false }
+    transcript: { type: String, required: false },
+    summary: { type: String, required: false }
 });
 
 // Add compound index to ensure meetingName is unique within a project

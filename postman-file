@@ -1,0 +1,362 @@
+{
+	"info": {
+		"_postman_id": "8374d7ef-12da-4d7b-b569-07c28989a9e2",
+		"name": "softAssistApi",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+		"_exporter_id": "39924610"
+	},
+	"item": [
+		{
+			"name": "jira",
+			"item": [
+				{
+					"name": "createIssue",
+					"protocolProfileBehavior": {
+						"disableBodyPruning": true
+					},
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"projectKey\":\"SCRUM\",\r\n    \"summary\":\"api test ticket\",\r\n    \"description\": \"test description\",\r\n    \"issueType\":\"Task\"\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "createIssue",
+							"host": [
+								"createIssue"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "createJiraProject",
+					"protocolProfileBehavior": {
+						"disableBodyPruning": true
+					},
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"projectKey\":\"SCRUM\",\r\n    \"summary\":\"api test ticket\",\r\n    \"description\": \"test description\",\r\n    \"issueType\":\"Task\"\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "createIssue",
+							"host": [
+								"createIssue"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "project",
+			"item": [
+				{
+					"name": "get projects",
+					"request": {
+						"auth": {
+							"type": "noauth"
+						},
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "http://127.0.0.1:8087/api/v1/frontend/project/",
+							"protocol": "http",
+							"host": [
+								"127",
+								"0",
+								"0",
+								"1"
+							],
+							"port": "8087",
+							"path": [
+								"api",
+								"v1",
+								"frontend",
+								"project",
+								""
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "create project",
+					"request": {
+						"auth": {
+							"type": "noauth"
+						},
+						"method": "POST",
+						"header": [],
+						"url": {
+							"raw": "http://127.0.0.1:8087/api/v1/frontend/project/softAssist/create",
+							"protocol": "http",
+							"host": [
+								"127",
+								"0",
+								"0",
+								"1"
+							],
+							"port": "8087",
+							"path": [
+								"api",
+								"v1",
+								"frontend",
+								"project",
+								"softAssist",
+								"create"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "get project by id",
+					"request": {
+						"auth": {
+							"type": "noauth"
+						},
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "http://127.0.0.1:8087/api/v1/frontend/project/d9dc1842-b3ac-4584-8b9a-3a5fd5e66efb",
+							"protocol": "http",
+							"host": [
+								"127",
+								"0",
+								"0",
+								"1"
+							],
+							"port": "8087",
+							"path": [
+								"api",
+								"v1",
+								"frontend",
+								"project",
+								"d9dc1842-b3ac-4584-8b9a-3a5fd5e66efb"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "associate project with jira project id",
+					"request": {
+						"auth": {
+							"type": "noauth"
+						},
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "http://127.0.0.1:8087/api/v1/frontend/project/d9dc1842-b3ac-4584-8b9a-3a5fd5e66efb",
+							"protocol": "http",
+							"host": [
+								"127",
+								"0",
+								"0",
+								"1"
+							],
+							"port": "8087",
+							"path": [
+								"api",
+								"v1",
+								"frontend",
+								"project",
+								"d9dc1842-b3ac-4584-8b9a-3a5fd5e66efb"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "meetings",
+			"item": [
+				{
+					"name": "add meeting",
+					"request": {
+						"auth": {
+							"type": "noauth"
+						},
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "formdata",
+							"formdata": [
+								{
+									"key": "audioFile",
+									"type": "file",
+									"src": "GMT20250327-012637_Recording_2560x1440.mp3"
+								},
+								{
+									"key": "projectId",
+									"value": "123x",
+									"type": "text"
+								},
+								{
+									"key": "meetingName",
+									"value": "presentation2",
+									"type": "text"
+								},
+								{
+									"key": "date",
+									"value": "2024-04-08",
+									"type": "text"
+								}
+							]
+						},
+						"url": {
+							"raw": "http://127.0.0.1:8087/api/v1/frontend/meetings",
+							"protocol": "http",
+							"host": [
+								"127",
+								"0",
+								"0",
+								"1"
+							],
+							"port": "8087",
+							"path": [
+								"api",
+								"v1",
+								"frontend",
+								"meetings"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "get meetings for a project",
+					"protocolProfileBehavior": {
+						"disableBodyPruning": true
+					},
+					"request": {
+						"auth": {
+							"type": "noauth"
+						},
+						"method": "GET",
+						"header": [],
+						"body": {
+							"mode": "formdata",
+							"formdata": [
+								{
+									"key": "audioFile",
+									"type": "file",
+									"src": "/C:/Users/jlmef/Downloads/simulated_jitsi_meeting.ogg",
+									"disabled": true
+								},
+								{
+									"key": "projectId",
+									"value": "123",
+									"type": "text",
+									"disabled": true
+								},
+								{
+									"key": "meetingName",
+									"value": "testFile",
+									"type": "text",
+									"disabled": true
+								},
+								{
+									"key": "date",
+									"value": "2024-03-25",
+									"type": "text",
+									"disabled": true
+								}
+							]
+						},
+						"url": {
+							"raw": "http://127.0.0.1:8087/api/v1/frontend/meetings/:projectId",
+							"protocol": "http",
+							"host": [
+								"127",
+								"0",
+								"0",
+								"1"
+							],
+							"port": "8087",
+							"path": [
+								"api",
+								"v1",
+								"frontend",
+								"meetings",
+								":projectId"
+							],
+							"variable": [
+								{
+									"key": "projectId",
+									"value": "123x"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "transcribe",
+					"request": {
+						"auth": {
+							"type": "noauth"
+						},
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "http://127.0.0.1:8087/api/v1/frontend/meetings/:meetingId/transcribe",
+							"protocol": "http",
+							"host": [
+								"127",
+								"0",
+								"0",
+								"1"
+							],
+							"port": "8087",
+							"path": [
+								"api",
+								"v1",
+								"frontend",
+								"meetings",
+								":meetingId",
+								"transcribe"
+							],
+							"variable": [
+								{
+									"key": "meetingId",
+									"value": "67f5cbb956d73f77de09d820"
+								}
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		}
+	]
+}
