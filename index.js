@@ -16,6 +16,7 @@ const connectDB = require("./db.js");
 const app = express();
 
 app.use((req, res, next) => {
+    res.setTimeout(10 * 60 * 1000);
     context.run(() => next());
 });
 
