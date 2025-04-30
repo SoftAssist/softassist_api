@@ -7,7 +7,19 @@ const { getPullRequests } = require('../../../../../lib/github/pullRequest');
 const { getGithubClient } = require('../../../../../lib/github/client');
 const GithubRepo = require('../../../../../models/githubRepo');
 const GithubPR = require('../../../../../models/github');
-// ...existing test route code...
+const { OpenAI } = require('openai');
+const config = require('config');
+const {createGitHubRepo} = require('../../../../../lib/github/createGithubRepo');
+const {parseMarkdownStructure} = require('../../../../../lib/github/parseMarkdown');
+const { createRepoFromPaths, initGitRepo, pushToGitHub } = require('../../../../../lib/github/createFoldersFromPath');
+const fs = require('fs');
+const path = require('path');
+const { get } = require('http');
+
+  const openai = new OpenAI({
+    apiKey: config.OPENAI_API_KEY,
+  });
+
 
 // Add new repository management routes
 router.post('/project/repo', async (req, res) => {
@@ -233,6 +245,62 @@ router.get('/:org/repos', async (req, res) => {
     }
 });
 
+router.post('/merge', async (req, res) => {
+    try {
+        const { orgName, repoName, prNumber } = req.body;
+        console.log(`Merging PR #${prNumber} in ${orgName}/${repoName}`);
+        const client = await getGithubClient();
+
+        // Merge the pull request
+        const response = await client.put(`/repos/${orgName}/${repoName}/pulls/${prNumber}/merge`
+
+            ,{
+                commit_title: `Merging PR #${prNumber} via SoftAssist Dashboard`,
+              }
+        );
+        console.log('Merge response:', response);
+        // Update the database
+        // await GithubPR.findOneAndUpdate(
+        //     { owner: org, repo, pullNumber },
+        //     { state: 'merged' },
+        //     { new: true }
+        // );
+
+        return res.json({
+            success: true,
+            message: 'Pull request merged successfully',
+        });
+    }
+    catch (error) {
+        console.error('Error merging pull request:', error.message);
+        return captureErrorAndRespond(error, res);
+    }
+}
+);
+
+router.post('/run-action', async (req, res) => {
+    try {
+        const { orgName, repoName, workflowId } = req.body;
+        console.log(`Running action ${workflowId} in ${orgName}/${repoName}`);
+        const client = await getGithubClient();
+
+        // Trigger the workflow
+        const response = await client.post(`/repos/${orgName}/${repoName}/actions/workflows/${workflowId}/dispatches`, {
+            ref: 'main' // or any other branch you want to trigger the workflow on
+        });
+
+        return res.json({
+            success: true,
+            message: 'Action triggered successfully',
+        });
+    }
+    catch (error) {
+        console.error('Error triggering action:', error.message);
+        return captureErrorAndRespond(error, res);
+    }
+}
+);
+
 router.get('/:owner/:repo/pulls', async (req, res) => {
     try {
         const { owner, repo } = req.params;
@@ -259,5 +327,171 @@ router.get('/:owner/:repo/pulls', async (req, res) => {
         return captureErrorAndRespond(error, res);
     }
 });
+
+
+async function getProjectStructure(context , repoName) {
+    const finalRepoName = repoName?.trim() || "my-app";
+
+const prompt = `
+You are a senior software architect.
+
+Given the following project description, generate a logical and clean **folder and file structure** for the project using **Markdown** format.
+
+**Important:**
+- Always adapt the folder structure, file extensions, config files, and tools based on the programming language and tech stack mentioned.
+- For Golang projects, use .go files, and Go modules (go.mod, go.sum).
+- For Node.js projects, use JavaScript/TypeScript files (e.g., .js, .ts, package.json).
+- For Python projects, use .py files, requirements.txt, etc.
+- For frontend projects (React, Vue, Next.js), use src/, public/, and appropriate JS/TS structure.
+- Only include backend, frontend, database folders if they are actually relevant from the description.
+- Always start the structure with a root folder named "${finalRepoName}/".
+- Expand based on common best practices for the given stack.
+- Output only a single Markdown code block inside triple backticks (\`\`\`) dont add the markdown key as well.
+- Do not output any explanation or notes outside the code block.
+
+**Project Description:**
+${context}
+
+**Output:**
+`;
+
+    
+  const response = await openai.chat.completions.create({
+    model: "gpt-4o",
+    messages: [
+      { role: "system", content: "You are a software engineer specializing in project scaffolding." },
+      { role: "user", content: prompt },
+    ],
+    temperature: 0.2,
+  });
+  return response.choices[0].message.content;
+}
+
+
+router.post('/generate-template', async (req, res) => {
+    try {
+        const { context , repoName} = req.body;
+
+        // Call OpenAI to get project structure markdown
+        const structureMarkdown = await getProjectStructure(context, repoName);
+
+        // (Optional) Save structureMarkdown into a database if you want
+
+        res.json({ success: true, data: structureMarkdown });
+    } catch (error) {
+        return captureErrorAndRespond(error, res);
+    }
+}
+);
+
+async function getFilePaths(context, repoName){
+    const prompt = `
+You are a helpful assistant.
+
+Given the following project description and structure in Markdown format,  
+convert it into a **flat array of full folder and file paths**, with all files correctly placed inside their parent folders.
+
+- Return the array as JSON.
+- Each array element should be a string representing the full path starting from the root folder.
+- Make sure nested folders and files are properly included.
+- keep the file and folder names as they are dont change any name even the parent folder name its should be same as the repoName ${repoName}.
+- No explanations outside the array.
+
+Example:
+
+Markdown:
+\`\`\`
+my-app/
+├── package.json
+├── public/
+│   ├── index.html
+│   └── favicon.ico
+├── src/
+│   ├── index.tsx
+│   └── utils/
+│       └── helpers.ts
+\`\`\`
+
+Output:
+\`\`\`json
+[
+  "my-app",
+  "my-app/package.json",
+  "my-app/public",
+  "my-app/public/index.html",
+  "my-app/public/favicon.ico",
+  "my-app/src",
+  "my-app/src/index.tsx",
+  "my-app/src/utils",
+  "my-app/src/utils/helpers.ts"
+]
+\`\`\`
+
+Now, here is the new project Markdown:
+
+${context}
+`;
+    const response = await openai.chat.completions.create({
+        model: "gpt-4o",
+        messages: [
+            { role: "system", content: "You are a software engineer specializing in project scaffolding." },
+            { role: "user", content: prompt },
+        ],
+    });
+
+    const resultText = response.choices[0].message.content;
+
+// Extract the array inside the triple backticks
+    const pathsArray = JSON.parse(resultText.match(/```json\n([\s\S]*?)\n```/)[1]);
+    return pathsArray;
+}
+
+
+
+
+router.post("/create-github-repo", async (req, res) => {
+    try {
+      const { repoName, markdownStructure} = req.body;
+  
+      if (!repoName || !markdownStructure) {
+        return res.status(400).json({ success: false, message: "Missing required fields" });
+      }
+  
+      // 1. Parse Markdown to paths
+      const paths = await getFilePaths(markdownStructure, repoName);
+  
+      // 2. Create local structure
+      const basePath = path.join("./generated_repos", repoName);
+  
+      // Clean if already exists
+      if (fs.existsSync(basePath)) {
+        fs.rmSync(basePath, { recursive: true });
+      }
+  
+      const repoPaths = await createRepoFromPaths(paths, "./generated_repos" ,markdownStructure);
+  
+      // 3. Create GitHub repo
+      const repo = await createGitHubRepo("SoftAssist", repoName);
+  
+      // 4. Initialize Git locally
+      initGitRepo(basePath);
+  
+      // 5. Push to GitHub
+      pushToGitHub(basePath, "SoftAssist", repoName);
+  
+      // 6. Done
+      return res.json({
+        success: true,
+        message: "Repository created and pushed successfully!",
+        repoUrl: repo.html_url,
+      });
+  
+    } catch (error) {
+      console.error("Error creating repo:", error.message || error);
+      return res.status(500).json({ success: false, message: "Something went wrong", error: error.message });
+    }
+  })
+
+
 
 module.exports = router;
