@@ -1,0 +1,11 @@
+log:
+  level: trace
+  path: /dev/null
+
+http:
+  port: 8087
+logger:
+  level: info
+  path: /dev/null
+  metadata:
+    service: softAssist
